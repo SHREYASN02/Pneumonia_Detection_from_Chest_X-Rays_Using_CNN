@@ -6,10 +6,12 @@ from keras_preprocessing.image import img_to_array
 from keras.models import load_model
 import numpy as np
 
-# Configure logging
-logging.basicConfig(level=logging.ERROR,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# Configure logging to integrate with Gunicorn
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
+
 # from gevent.pywsgi import WSGIServer
 
 
@@ -20,7 +22,9 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(APP_ROOT, 'models/pneu_cnn_model.h5')
 STATIC_PATH = os.path.join(APP_ROOT, 'static')
 
+app.logger.info("Loading model...")
 model = load_model(MODEL_PATH)
+app.logger.info("Model loaded successfully.")
 
 @app.route('/',methods=['GET'])
 def hello_world():
@@ -44,5 +48,5 @@ def predict():
         classification ='%s (%.2f%%)' %(result2,result1*100)
         return render_template('index.html',prediction=classification,imagePath=image_path)
     except Exception as e:
-        logger.exception(f"Error in predict endpoint {request.path}: {e}")
+        app.logger.exception(f"Error in predict endpoint {request.path}: {e}")
         return render_template('index.html', prediction="Error during prediction. Please try again.", imagePath=None)
