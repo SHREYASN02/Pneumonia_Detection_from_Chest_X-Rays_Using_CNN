@@ -1,4 +1,5 @@
 import logging
+import os
 from flask import Flask,render_template,request
 from tensorflow.keras.utils import load_img
 from keras_preprocessing.image import img_to_array
@@ -13,8 +14,13 @@ logger = logging.getLogger(__name__)
 
 
 app = Flask(__name__)
-Model_Path= 'models/pneu_cnn_model.h5'
-model = load_model(Model_Path)
+
+# Define absolute paths for model and static files
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(APP_ROOT, 'models/pneu_cnn_model.h5')
+STATIC_PATH = os.path.join(APP_ROOT, 'static')
+
+model = load_model(MODEL_PATH)
 
 @app.route('/',methods=['GET'])
 def hello_world():
@@ -24,7 +30,7 @@ def hello_world():
 def predict():
     try:
         imagefile= request.files["imagefile"]
-        image_path ='./static/' + imagefile.filename
+        image_path = os.path.join(STATIC_PATH, imagefile.filename)
         imagefile.save(image_path)
         img=load_img(image_path,target_size=(500,500),color_mode='grayscale')
         x=img_to_array(img)
