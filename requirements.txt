@@ -3,3 +3,4 @@ tensorflow-cpu
 keras
 numpy
 gunicorn
+keras_preprocessing
