@@ -30,5 +30,3 @@ def predict():
         result2='Positive'
     classification ='%s (%.2f%%)' %(result2,result1*100)
     return render_template('index.html',prediction=classification,imagePath=image_path)
-if __name__ == '__main__':
-    app.run(port=5000,debug=True)
